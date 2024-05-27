@@ -1,75 +1,59 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // Variabelen voor de bal en het speelveld
-  var ball = document.getElementById("ball");
-  var container = document.querySelector(".container");
-  var containerRect = container.getBoundingClientRect();
-
-  // Variabelen voor de score en obstakels
-  var score = 0;
+  var player = document.getElementById("player");
   var obstacles = [];
 
-  // Functie om de bal te bewegen op basis van de kanteling
-  function moveBall(event) {
-    var x = event.gamma; // Kanteling langs de x-as
-    var y = event.beta; // Kanteling langs de y-as
-
-    // Beweeg de bal op basis van de kanteling
-    ball.style.left = containerRect.width / 2 + x + "px"; // Horizontale beweging
-    ball.style.top = containerRect.height / 2 + y + "px"; // Verticale beweging
-
-    // Controleer op botsingen met obstakels
-    obstacles.forEach(function (obstacle) {
-      var obstacleRect = obstacle.getBoundingClientRect();
-      if (
-        ball.getBoundingClientRect().left < obstacleRect.right &&
-        ball.getBoundingClientRect().right > obstacleRect.left &&
-        ball.getBoundingClientRect().top < obstacleRect.bottom &&
-        ball.getBoundingClientRect().bottom > obstacleRect.top
-      ) {
-        // Botsing gedetecteerd
-        gameOver();
-      }
-    });
-  }
-
-  // Functie om obstakels te maken en te laten bewegen
-  function createObstacle() {
-    var obstacle = document.createElement("div");
-    obstacle.classList.add("obstacle");
-    obstacle.style.left = Math.random() * containerRect.width + "px";
-    container.appendChild(obstacle);
-    obstacles.push(obstacle);
-
-    // Laat het obstakel bewegen
-    var obstacleInterval = setInterval(function () {
-      var obstacleBottom = parseInt(
-        window.getComputedStyle(obstacle).getPropertyValue("bottom")
-      );
-      obstacle.style.bottom = obstacleBottom + 1 + "px";
-
-      // Controleer of het obstakel buiten het speelveld valt
-      if (obstacleBottom > containerRect.height) {
-        clearInterval(obstacleInterval);
-        container.removeChild(obstacle);
-        obstacles.splice(obstacles.indexOf(obstacle), 1);
-        score++; // Verhoog de score bij het passeren van een obstakel
-      }
-    }, 10);
-  }
-
-  // Functie voor het beëindigen van het spel
-  function gameOver() {
-    alert("Game Over! Je score is: " + score);
-    window.location.reload(); // Herlaad de pagina om opnieuw te spelen
-  }
-
-  // Event listener voor device orientation
   if (window.DeviceOrientationEvent) {
-    window.addEventListener("deviceorientation", moveBall);
+    window.addEventListener("deviceorientation", function (event) {
+      var gamma = event.gamma;
+      var screenWidth = window.innerWidth;
+      var playerWidth = parseInt(player.offsetWidth);
+      var newPosition = screenWidth / 2 + gamma * (screenWidth / 90);
+
+      newPosition = Math.max(newPosition, playerWidth / 2);
+      newPosition = Math.min(newPosition, screenWidth - playerWidth / 2);
+
+      player.style.left = newPosition + "px";
+    });
   } else {
     alert("Deze browser ondersteunt geen Device Orientation API.");
   }
 
-  // Start het spel door obstakels te maken
-  setInterval(createObstacle, 2000);
+  function createObstacle() {
+    var obstacle = document.createElement("div");
+    obstacle.classList.add("obstacle");
+    obstacle.style.left = Math.random() * (window.innerWidth - 30) + "px";
+    document.body.appendChild(obstacle);
+    obstacles.push(obstacle);
+
+    var obstacleInterval = setInterval(function () {
+      var obstacleBottom = parseInt(
+        window.getComputedStyle(obstacle).getPropertyValue("top")
+      );
+      obstacle.style.top = obstacleBottom + 1 + "px";
+
+      var playerRect = player.getBoundingClientRect();
+      var obstacleRect = obstacle.getBoundingClientRect();
+
+      if (
+        playerRect.left < obstacleRect.right &&
+        playerRect.right > obstacleRect.left &&
+        playerRect.bottom > obstacleRect.top &&
+        playerRect.top < obstacleRect.bottom
+      ) {
+        gameOver();
+      }
+
+      if (obstacleBottom > window.innerHeight) {
+        obstacle.remove();
+        clearInterval(obstacleInterval);
+      }
+    }, 10);
+  }
+
+  function gameOver() {
+    alert("Game Over!");
+    window.location.reload();
+  }
+
+  setInterval(createObstacle, 3000);
 });
