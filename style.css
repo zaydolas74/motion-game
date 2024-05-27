@@ -4,27 +4,22 @@ html {
   padding: 0;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 
-.container {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  perspective: 1000px;
+#player {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background-color: blue;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .obstacle {
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   background-color: red;
-  border-radius: 50%;
-}
-
-#ball {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background-color: red;
-  border-radius: 50%;
 }
